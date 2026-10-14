@@ -1,0 +1,32 @@
+DEMO LECTURE NOTES — Information Retrieval Fundamentals
+Original sample material written for studyAI. This is a demo dataset, not a student's private lecture or an authoritative textbook.
+
+1. Documents and passages
+Information retrieval finds passages relevant to a user's query. A document can be divided into smaller chunks so that a long lecture does not hide a short useful definition. Paragraph and sentence boundaries help keep related ideas together. Small overlaps between long chunks preserve context around boundaries. Each passage should retain its source filename and page number when available.
+
+2. Term frequency
+Term frequency measures how often a term appears in a passage. A term repeated within a passage can indicate that the passage concerns that subject. Raw frequency alone can overvalue common words. Sublinear term frequency uses 1 + log(count) for nonzero counts, reducing the influence of repeated terms. A term absent from a passage has weight zero.
+
+3. Inverse document frequency
+Inverse document frequency, or IDF, gives more weight to terms that occur in fewer passages. Common terms shared by many passages are less useful for distinguishing topics. With smoothing, scikit-learn computes IDF as log((1 + number of passages) / (1 + number of passages containing the term)) + 1. The TF-IDF weight combines term frequency and inverse document frequency.
+
+4. Vectorization
+A vocabulary assigns each retained term a column. Each passage becomes a vector whose entries are TF-IDF weights. Most vocabulary terms do not appear in any one passage, so the matrix is sparse. Unigrams represent individual terms; bigrams represent adjacent pairs such as "cosine similarity". A query is transformed using the fitted passage vocabulary, not by fitting a new vocabulary. Terms outside that vocabulary contribute no dimensions.
+
+5. Cosine similarity
+Cosine similarity is the dot product of two vectors divided by the product of their Euclidean lengths. It measures the angle between vectors rather than their raw magnitude. For nonnegative TF-IDF vectors, scores range from zero to one. Orthogonal vectors have similarity zero; identical nonzero vector directions have similarity one. When vectors are L2-normalized, cosine similarity equals their dot product. A zero query vector has no matching terms and yields no relevant passage in this application.
+
+6. Ranking and limitations
+A retrieval service ranks passages by descending cosine similarity and returns the top relevant passages. These scores measure lexical overlap, not probabilities of correctness or confidence in a student's knowledge. Synonyms with no shared vocabulary may fail to match. Retrieval can miss useful material or return passages that share terms but are not conceptually relevant. A larger score alone does not prove an answer is true.
+
+7. Retrieval-augmented question generation
+The local language model receives retrieved passages as evidence for practice questions. Each question has four distinct answer options, one stored answer index, a topic label, and a short explanation. Source citations should resolve only to the supplied passage IDs. Structured JSON validation checks the response format but cannot guarantee factual accuracy. A student should compare generated explanations with the notes.
+
+8. Scoring and reasoning feedback
+Multiple-choice scoring compares the student's selected answer index with the stored correct index. It is deterministic and independent of the model's judgment of the student's explanation. Qualitative feedback may describe reasoning as supported, partially supported, unsupported, or unclear. Such feedback is an estimate. A correct selection can coexist with a weak explanation, and an incorrect selection can coexist with partially supported reasoning.
+
+9. Reviewing topics
+Topic accuracy is the number of correct submitted answers for a topic divided by the number answered for that topic. Overall accuracy uses total correct answers divided by total answered questions; it is not the unweighted average of topic percentages. Incorrect answers and recurring qualitative concerns can suggest topics to review. Small samples and model errors limit these estimates; they do not diagnose understanding.
+
+10. Local data lifecycle
+Uploaded text and retrieval indexes remain in temporary backend memory. Expiry, explicit deletion, or restarting the backend clears these sessions. Browser localStorage can keep bounded submitted quiz records and short feedback excerpts across refreshes. Original PDF files and full pasted lecture notes are not saved there. Persisted scores may outlive the temporary source index, so users may need to process the notes again to retrieve review passages.
