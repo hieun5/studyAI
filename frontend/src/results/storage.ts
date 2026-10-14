@@ -147,7 +147,7 @@ function question(value: unknown): CompletedQuestion {
   )
     throw new Error("Inconsistent answer record");
   if (
-    !["pending", "available", "unavailable"].includes(
+    !["pending", "available", "unavailable", "skipped"].includes(
       item.feedbackStatus as string,
     )
   )
@@ -155,6 +155,12 @@ function question(value: unknown): CompletedQuestion {
   const savedFeedback = feedback(item.feedback);
   if ((item.feedbackStatus === "available") !== (savedFeedback !== null))
     throw new Error("Inconsistent feedback record");
+  const studentExplanation = text(item.studentExplanation, 2000, 0);
+  if (
+    item.feedbackStatus === "skipped" &&
+    (studentExplanation.trim() !== "" || item.feedbackError !== null)
+  )
+    throw new Error("Inconsistent skipped feedback record");
   return {
     questionId: text(item.questionId, 128),
     question: text(item.question, 600, 8),
@@ -165,7 +171,7 @@ function question(value: unknown): CompletedQuestion {
     selectedAnswer: options[selectedIndex],
     correctAnswer: options[correctIndex],
     correct: selectedIndex === correctIndex,
-    studentExplanation: text(item.studentExplanation, 2000, 10),
+    studentExplanation,
     answerExplanation: text(item.answerExplanation, 1000),
     answerSources: list(item.answerSources, 4).map(source),
     feedback: savedFeedback,

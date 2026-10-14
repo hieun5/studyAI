@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { Card, Badge } from "./components/ui";
+import { Badge } from "./components/ui";
 import { API_BASE } from "./api";
 import StartStudying from "./pages/StartStudying";
 import Dashboard from "./pages/Dashboard";
 import useQuizResults from "./results/useQuizResults";
 
-type Page = "Dashboard" | "Study Materials" | "Start Studying";
+type Page = "Dashboard" | "Start Studying";
 const pages: { name: Page; icon: string }[] = [
   { name: "Dashboard", icon: "◫" },
-  { name: "Study Materials", icon: "▤" },
   { name: "Start Studying", icon: "✧" },
 ];
 function initialTheme(): boolean {
@@ -101,11 +100,6 @@ export default function App() {
             ))}
           </nav>
           <div className="sidebar-bottom">
-            <div className="local-note">
-              <span aria-hidden="true">◎</span>
-              <strong>Your space. Your pace.</strong>
-              <p>Free to use. Built to run locally.</p>
-            </div>
             <button
               className="theme-button"
               onClick={() => setDark(!dark)}
@@ -114,7 +108,6 @@ export default function App() {
               <span aria-hidden="true">{dark ? "☀" : "◐"}</span>
               {dark ? "Switch to light mode" : "Switch to dark mode"}
             </button>
-            <div className="stage-label">LOCAL AI · PORTFOLIO MVP</div>
           </div>
         </aside>
         <div className="main-shell">
@@ -139,16 +132,12 @@ export default function App() {
                 <h1>
                   {page === "Dashboard"
                     ? "See where to focus next."
-                    : page === "Study Materials"
-                      ? "Your knowledge starts here."
-                      : "Turn your notes into understanding."}
+                    : "Turn your notes into understanding."}
                 </h1>
                 <p>
                   {page === "Dashboard"
                     ? "Review your quiz scores, reasoning feedback, and next study topics."
-                    : page === "Study Materials"
-                      ? "Bring your lecture notes together, one topic at a time."
-                      : "Add your lecture notes and set up your next practice session."}
+                    : "Add your lecture notes and set up your next practice session."}
                 </p>
               </div>
               <Badge>Local study workspace</Badge>
@@ -167,28 +156,6 @@ export default function App() {
                 onStart={() => setPage("Start Studying")}
                 activeSessionId={activeSessionId}
               />
-            )}
-            {page === "Study Materials" && (
-              <Card className="empty-state">
-                <span className="empty-icon" aria-hidden="true">
-                  ▤
-                </span>
-                <h2>A fresh page for your notes.</h2>
-                <p>
-                  The saved-materials library is not implemented yet.
-                  <br />
-                  You can paste notes or select a PDF in Start Studying.
-                </p>
-                <button
-                  className="primary"
-                  onClick={() => setPage("Start Studying")}
-                >
-                  Add study input <span aria-hidden="true">→</span>
-                </button>
-                <small>
-                  Notes and selected files stay in memory for this visit.
-                </small>
-              </Card>
             )}
             <footer>
               Made for focused minds.{" "}

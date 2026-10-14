@@ -182,6 +182,32 @@ test("Results and derived summaries persist and reload in localStorage format", 
   assert.match(reloaded.notice, /Rebuilt/);
 });
 
+test("Optional explanations persist without inventing feedback or review signals", () => {
+  const blank = question("blank");
+  blank.submission.student_explanation = "";
+  blank.submission.feedback = null;
+  blank.submission.feedback_status = "skipped";
+  blank.submission.feedback_error = null;
+  const short = question("short");
+  short.submission.student_explanation = "ATP";
+  const attempts = [attempt("optional", [blank, short])];
+  const storage = new MemoryStorage();
+  assert.equal(saveResults(attempts, storage).persisted, true);
+  const loaded = loadResults(storage);
+  assert.equal(loaded.notice, "");
+  assert.equal(loaded.writeBlocked, false);
+  assert.deepEqual(loaded.attempts, attempts);
+  assert.equal(loaded.attempts[0].questions[0].studentExplanation, "");
+  assert.equal(loaded.attempts[0].questions[0].feedbackStatus, "skipped");
+  assert.equal(summarize(loaded.attempts).scorePercent, 100);
+  assert.equal(summarize(loaded.attempts).recommendations.length, 0);
+  assert.equal(summarize(loaded.attempts).topics[0].feedbackCount, 1);
+  const invalid = JSON.parse(storage.getItem(RESULTS_KEY));
+  invalid.attempts[0].questions[0].studentExplanation = "Contradictory skipped feedback";
+  storage.setItem(RESULTS_KEY, JSON.stringify(invalid));
+  assert.equal(loadResults(storage).writeBlocked, true);
+});
+
 test("Invalid saved data is rejected and preserved until explicit reset", () => {
   const storage = new MemoryStorage();
   saveResults([attempt()], storage);

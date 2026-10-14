@@ -46,7 +46,7 @@ export default function AttemptFeedback({
                   <dd>{question.correctAnswer}</dd>
                   <dt>Your written explanation</dt>
                   <dd className="preserve-text">
-                    {question.studentExplanation}
+                    {question.studentExplanation || "Not provided."}
                   </dd>
                   <dt>Answer-key explanation</dt>
                   <dd>{question.answerExplanation}</dd>
@@ -99,8 +99,10 @@ export default function AttemptFeedback({
                   <p className="form-message">
                     {question.feedbackStatus === "pending"
                       ? "Feedback was pending when this result was saved. Recover the live practice session to check it while its index remains available."
-                      : "AI feedback is unavailable. " +
-                        (question.feedbackError ?? "")}{" "}
+                      : question.feedbackStatus === "skipped"
+                        ? "No explanation provided. AI reasoning feedback was skipped."
+                        : "AI feedback is unavailable. " +
+                          (question.feedbackError ?? "")}{" "}
                     Your numerical score is still based only on the selected
                     answer.
                   </p>

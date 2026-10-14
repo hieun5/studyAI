@@ -272,7 +272,7 @@ test("Full app records a submission, restores it after remount, and clears only 
   };
   window.localStorage.setItem("studyai-theme", "dark");
   await render(createElement(App));
-  await act(async () => host.querySelectorAll(".nav-item")[2].click());
+  await act(async () => [...host.querySelectorAll(".nav-item")].find((item) => item.textContent.includes("Start Studying")).click());
   await setInput(
     "#notes",
     "Mitochondria generate ATP. ATP stores energy for cells.",

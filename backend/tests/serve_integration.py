@@ -107,8 +107,8 @@ def main():
             fixture = base64.b64encode(pdf.tobytes()).decode()
         print(json.dumps({"base": f"http://127.0.0.1:{sock.getsockname()[1]}", "pdf": fixture}), flush=True)
         sys.stdin.readline()
-        if MockOllama.chats != 6:
-            raise RuntimeError(f"Expected generation + five feedback calls, received {MockOllama.chats}")
+        if MockOllama.chats != 5:
+            raise RuntimeError(f"Expected generation + four feedback calls, received {MockOllama.chats}")
     finally:
         server.should_exit = True
         thread.join(timeout=5)

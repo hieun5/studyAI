@@ -176,26 +176,6 @@ small {
 .sidebar-bottom {
   margin-top: auto;
 }
-.local-note {
-  padding: 18px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 20px;
-}
-.local-note > span {
-  display: block;
-  font-size: 23px;
-  color: var(--purple);
-  margin-bottom: 10px;
-}
-.local-note strong {
-  font-size: 14px;
-}
-.local-note p {
-  font-size: 13px;
-  margin-bottom: 0;
-}
 .theme-button {
   border: 0;
   background: transparent;
@@ -208,14 +188,6 @@ small {
 }
 .theme-button span {
   font-size: 21px;
-}
-.stage-label {
-  font-size: 11px;
-  letter-spacing: 1.3px;
-  color: var(--muted);
-  border-top: 1px solid var(--border);
-  padding: 20px 10px 0;
-  margin-top: 12px;
 }
 .main-shell {
   flex: 1;
@@ -690,12 +662,6 @@ legend {
 }
 .study-aside li + li {
   margin-top: 10px;
-}
-.coming-note {
-  padding: 25px 12px;
-}
-.coming-note h3 {
-  margin-top: 18px;
 }
 .desktop-notice {
   display: none;
@@ -1194,7 +1160,7 @@ textarea:disabled {
   overflow-wrap: anywhere;
 }
 
-.demo-notes { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px; margin-bottom:22px; border:1px solid var(--border); border-radius:12px; background:var(--panel); }
+.demo-notes { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding:16px; margin-bottom:22px; border:1px solid var(--border); border-radius:12px; background:var(--panel); }
 .demo-notes > div { display:grid; gap:8px; }
 .demo-notes span:not(.badge) { color:var(--muted); font-size: 15px; }
 .demo-notes button { flex-shrink:0; }

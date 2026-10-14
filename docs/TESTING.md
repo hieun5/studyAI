@@ -16,11 +16,20 @@ Recorded 2026-10-13 on Windows, Python 3.12.10 and Node 24.21.0. Re-run these ch
 | Browser visual acceptance | Not run | No enabled browser surface; jsdom is not visual QA |
 | Vite development optimizer | Blocked in managed environment | esbuild cannot read a parent directory; build/preview succeeds |
 
-The HTTP harness is exclusively in backend/tests/serve_integration.py. It starts ephemeral local Ollama-protocol and FastAPI servers, verifies fixed message roles, JSON schemas and positive real retrieval scores, and expects one generation plus five feedback calls. Mock content is labeled TEST MOCK and cannot be activated from production settings/routes. No product fake-output fallback exists.
+The HTTP harness is exclusively in backend/tests/serve_integration.py. It starts ephemeral local Ollama-protocol and FastAPI servers, verifies fixed message roles, JSON schemas and positive real retrieval scores, and expects one generation plus four feedback calls; one answer omits reasoning and skips inference. Mock content is labeled TEST MOCK and cannot be activated from production settings/routes. No product fake-output fallback exists.
 
-The test loads original demo notes, rejects empty/unsupported/malformed inputs, processes a generated two-page PDF with an empty MIME type, clears its session, generates five questions, submits one correct/four incorrect answers, verifies locked choices and a backend 409 on edits, retrieves targeted passages, checks 20% accuracy, remounts/restores history, and clears history. Temporary servers shut down after the test.
+The test loads original demo notes, rejects empty/unsupported/malformed inputs, processes a generated two-page PDF with an empty MIME type, clears its session, generates five questions, submits one correct/four incorrect answers (including one without reasoning), verifies locked choices and a backend 409 on edits, retrieves targeted passages, checks 20% accuracy, remounts/restores history, and clears history. Temporary servers shut down after the test.
 
 Backend unittest classes are collected by Pytest. One Starlette TestClient/httpx deprecation warning remains; it does not fail tests. Ordinary network timeouts, malformed JSON and session deletion behavior have frontend API regression tests.
+
+## Interface and optional reasoning update - 2026-10-14
+
+- Backend: 55 Pytest tests and 32 unittest subtests pass; backend health and loopback CORS pass.
+- Frontend: 40 tests and the full HTTP integration test pass; TypeScript and production build pass.
+- Optional reasoning: blank, whitespace-only, and omitted explanations score and lock without an Ollama chat. Short explanations still receive feedback. Feedback retries preserve the skipped state, and saved results restore blank explanations after refresh.
+- Interface: the library navigation/placeholder and sidebar slogans are removed. The sample-notes control uses the primary button style and wraps within narrow desktop cards.
+- HTTP integration uses real FastAPI, PyMuPDF, and scikit-learn with test-only mocked inference; this update did not rerun real-model acceptance. The prior live smoke result remains recorded above.
+- Visual acceptance remains pending: no connected browser was available. Pytest reported the existing Starlette/httpx deprecation plus a nonblocking cache-directory permission warning.
 
 ## Commands
 
@@ -57,7 +66,7 @@ npm.cmd run test:integration
 2. Start FastAPI plus frontend/preview. Confirm /health/ollama lists service/model available.
 3. Load demo notes, process them, and search for IDF/cosine. Check returned passages and no invented page numbers.
 4. Generate five questions, then repeat a fresh session requesting ten. Validate four options, plausible single keys, distinct questions, and any partial-generation notice. Check facts against the notes.
-5. Answer correctly and incorrectly with supported and intentionally flawed explanations. Check deterministic scoring, required reasoning, locked inputs, qualitative estimates, review topic and actual source passages.
+5. Answer correctly and incorrectly with supported and intentionally flawed explanations. Also submit an answer without an explanation: check immediate deterministic scoring, skipped reasoning feedback, locked inputs, and saved results after refresh. For explanations, check qualitative estimates, review topic and actual source passages.
 6. Finish the quiz; open Dashboard, expand feedback, retrieve a suggested topic. Refresh at the same browser origin and confirm scores/history persist.
 7. Inspect light/dark layouts at 1024px and a wider desktop width, keyboard focus, labels, loading/error states, long filenames and long feedback.
 8. Stop Ollama: verify friendly startup instructions; stop it after generation and submit to confirm scored answers persist and feedback can retry after restart.

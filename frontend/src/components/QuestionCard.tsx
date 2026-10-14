@@ -48,7 +48,7 @@ export default function QuestionCard({
   const locked = Boolean(result) || uncertain || busy;
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!locked && choice !== null && reasoning.trim().length >= 10)
+    if (!locked && choice !== null)
       onSubmit(choice, reasoning.trim());
   }
   return (
@@ -87,22 +87,20 @@ export default function QuestionCard({
             ))}
           </div>
         </fieldset>
-        <label htmlFor="reasoning">Explain your reasoning</label>
+        <label htmlFor="reasoning">Explain your reasoning (optional)</label>
         <textarea
           id="reasoning"
           value={result?.student_explanation ?? reasoning}
           onChange={(event) => setReasoning(event.target.value)}
           disabled={locked}
-          required
-          minLength={10}
           maxLength={2000}
           rows={4}
           aria-describedby="reasoning-help"
           placeholder="Why does your chosen answer make sense? Connect it to a concept in your notes."
         />
         <p className="reasoning-help" id="reasoning-help">
-          At least 10 characters. Your answer and explanation lock on
-          submission.
+          Add an explanation for AI feedback, or submit just your answer. Your
+          answer and explanation lock on submission.
         </p>
         {!result && (
           <div className="generate-row">
@@ -112,11 +110,13 @@ export default function QuestionCard({
             <button
               type="submit"
               className="primary"
-              disabled={
-                locked || choice === null || reasoning.trim().length < 10
-              }
+              disabled={locked || choice === null}
             >
-              {busy ? "Scoring and evaluating…" : "Submit answer"}
+              {busy
+                ? reasoning.trim()
+                  ? "Scoring and evaluating…"
+                  : "Scoring…"
+                : "Submit answer"}
             </button>
           </div>
         )}
@@ -185,6 +185,8 @@ export default function QuestionCard({
                   <Sources passages={result.feedback.source_passages_used} />
                 </details>
               </>
+            ) : result.feedback_status === "skipped" ? (
+              <p>No explanation provided. AI reasoning feedback was skipped.</p>
             ) : (
               <>
                 <p role="status">

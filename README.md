@@ -2,7 +2,7 @@
 
 A free, local AI study workspace that turns lecture notes into practice questions and helps students decide what to review next. An overnight full-stack portfolio MVP built with React, TypeScript, FastAPI, and real scikit-learn retrieval.
 
-**Status:** Stages 1–5 implemented. Automated NLP, quiz, dashboard, and HTTP integration checks pass. A live Ollama smoke run generated five questions and feedback for one submitted answer; desktop visual acceptance remains pending. The saved-materials library is a clearly labeled placeholder.
+**Status:** Stages 1–5 implemented. Automated NLP, quiz, dashboard, and HTTP integration checks pass. A live Ollama smoke run generated five questions and feedback for one submitted answer; desktop visual acceptance remains pending.
 
 ## Features
 
@@ -10,8 +10,8 @@ A free, local AI study workspace that turns lecture notes into practice question
 - Validate PDF type, size, pages, and readable text; explain the unsupported OCR requirement for scans.
 - Search passages using TF-IDF and cosine similarity with source filename/page metadata.
 - Generate 5 or 10 multiple-choice questions through local Ollama; validate JSON, reject obvious duplicates, and disclose partial generations.
-- Require a written explanation, hide keys until submission, and lock submitted answers.
-- Receive qualitative reasoning feedback, possible misconceptions, review topics, and retrieved evidence. Retry unavailable feedback independently of scoring.
+- Accept answers with optional written explanations, hide keys until submission, and lock submitted answers.
+- Add an explanation to receive qualitative reasoning feedback, possible misconceptions, review topics, and retrieved evidence. Answers without explanations are scored immediately and skip AI reasoning feedback. Retry unavailable feedback independently of scoring.
 - Inspect Recharts topic bars, answer accuracy, gap signals, review passages, and expandable feedback.
 - Persist bounded submitted results in localStorage across refreshes; clear history independently of theme.
 - Purple desktop interface, light/dark modes, loading states, and friendly local service errors.
@@ -152,7 +152,7 @@ Ollama URLs must use loopback HTTP. Use a local model tag present in /api/tags. 
 1. Open Start Studying → **Load sample notes**. The [original demo lecture](frontend/src/data/demo-lecture.txt) contains information-retrieval concepts, no private notes or prerecorded AI outputs.
 2. **Process Material**. Search “inverse document frequency” to see real passages/scores. Alternatively use a text-based PDF; scans show an OCR limitation error.
 3. Confirm Ollama availability, select 5 or 10, and **Generate Questions**. Limited retries may produce fewer questions.
-4. Select an answer and write at least ten characters of reasoning. Submit, inspect the locked score and separate AI estimate, then advance.
+4. Select an answer; optionally explain your reasoning to receive AI feedback. Submit, inspect the locked score and any separate AI estimate, then advance.
 5. View Dashboard scores, topic bars, gap signals, expanded feedback, and **Find passages in my notes**.
 6. Refresh at the same origin. Submitted records persist; active quizzes/source indexes are not durably persisted. Reprocess matching notes if targeted retrieval is unavailable.
 7. **Clear saved results** resets history. **Clear session** deletes the temporary index; theme settings remain independent.

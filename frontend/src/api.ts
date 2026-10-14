@@ -100,7 +100,7 @@ export interface Submission {
   answer_explanation: string;
   answer_sources: Passage[];
   feedback: ReasoningFeedback | null;
-  feedback_status: "pending" | "available" | "unavailable";
+  feedback_status: "pending" | "available" | "unavailable" | "skipped";
   feedback_error: string | null;
 }
 export interface PracticeQuestion {

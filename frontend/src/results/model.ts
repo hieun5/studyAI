@@ -14,7 +14,7 @@ export interface CompletedQuestion {
   answerExplanation: string;
   answerSources: Passage[];
   feedback: ReasoningFeedback | null;
-  feedbackStatus: "pending" | "available" | "unavailable";
+  feedbackStatus: "pending" | "available" | "unavailable" | "skipped";
   feedbackError: string | null;
   answeredAt: number;
 }

@@ -140,11 +140,11 @@ class PracticeService:
                 "correct_index": question.generated.correct_index,
                 "answer_explanation": question.generated.explanation,
                 "answer_sources": question.sources,
-                "feedback": None, "feedback_status": "pending", "feedback_error": None,
+                "feedback": None, "feedback_status": "pending" if answer.explanation else "skipped", "feedback_error": None,
             }
             return True, question.submission
         fresh, result = self.store.practice_action(session_id, lock)
-        if not fresh:
+        if not fresh or result["feedback_status"] == "skipped":
             return result
         return self._evaluate(session_id, question_id)
 
@@ -155,7 +155,7 @@ class PracticeService:
                 raise MaterialError("Submit your answer before requesting feedback.", 409)
             if question.submission["feedback_status"] == "pending":
                 raise MaterialError("Feedback is still processing. Try again shortly.", 409)
-            if question.submission["feedback_status"] == "available":
+            if question.submission["feedback_status"] in ("available", "skipped"):
                 return False, question.submission
             question.submission["feedback_status"] = "pending"
             question.submission["feedback_error"] = None

@@ -83,7 +83,11 @@ test("Real frontend → FastAPI → sklearn → mocked Ollama HTTP → persisted
     root = createRoot(host);
     await act(async () => root.render(createElement(App)));
     await waitFor(() => host.textContent.includes("Backend online") && !host.textContent.includes("Checking Ollama"));
-    await act(async () => host.querySelectorAll(".nav-item")[2].click());
+    await act(async () => [...host.querySelectorAll(".nav-item")].find((item) => item.textContent.includes("Start Studying")).click());
+    assert.equal(host.querySelectorAll(".nav-item").length, 2);
+    assert.doesNotMatch(host.textContent, /Study Materials|COMING LATER|PORTFOLIO MVP|Your space\. Your pace\./);
+    const sampleButton = [...host.querySelectorAll("button")].find((item) => item.textContent.includes("Load sample notes"));
+    assert.ok(sampleButton.classList.contains("primary"));
     await click("Process Material");
     assert.match(host.querySelector(".form-error").textContent, /Paste lecture notes or select/);
     await upload(new File(["unsupported"], "notes.txt", { type: "text/plain" }));
@@ -109,15 +113,18 @@ test("Real frontend → FastAPI → sklearn → mocked Ollama HTTP → persisted
     assert.equal(payloadBefore, null, "Unsubmitted keys are not persisted");
     for (let i = 0; i < 5; i++) {
       await act(async () => host.querySelectorAll(".answer-options input")[i === 0 ? 0 : 1].click());
-      await setInput("#reasoning", "Term frequency counts terms; IDF reduces the influence of terms shared across passages.");
+      if (i > 0) await setInput("#reasoning", "Term frequency counts terms; IDF reduces the influence of terms shared across passages.");
       await click("Submit answer");
-      await waitFor(() => host.textContent.includes("TEST MOCK") && [...host.querySelectorAll(".answer-options input")].every((input) => input.matches(":disabled")));
+      await waitFor(() => host.textContent.includes(i === 0 ? "AI reasoning feedback was skipped" : "TEST MOCK") && [...host.querySelectorAll(".answer-options input")].every((input) => input.matches(":disabled")));
       if (i < 4) await click("Next question");
     }
     const saved = JSON.parse(window.localStorage.getItem(RESULTS_KEY));
     assert.equal(saved.summary.answered, 5);
     assert.equal(saved.summary.correct, 1);
-    assert.ok(saved.attempts[0].questions.every((q) => q.feedback.source_passages_used.length > 0));
+    assert.equal(saved.attempts[0].questions[0].studentExplanation, "");
+    assert.equal(saved.attempts[0].questions[0].feedbackStatus, "skipped");
+    assert.equal(saved.attempts[0].questions[0].feedback, null);
+    assert.ok(saved.attempts[0].questions.slice(1).every((q) => q.feedback.source_passages_used.length > 0));
     assert.ok(!window.localStorage.getItem(RESULTS_KEY).includes(JSON.stringify(host.querySelector("#notes").value)), "Full pasted notes are not persisted; bounded source excerpts are allowed");
     await act(async () => host.querySelectorAll(".nav-item")[0].click());
     await waitFor(() => !!host.querySelector(".recharts-bar-rectangle"));
@@ -129,6 +136,9 @@ test("Real frontend → FastAPI → sklearn → mocked Ollama HTTP → persisted
     const snapshotResponse = await fetch(config.base + "/sessions/" + session + "/practice");
     assert.equal(snapshotResponse.status, 200);
     const snapshot = await snapshotResponse.json();
+    const skippedRetry = await fetch(config.base + "/sessions/" + session + "/questions/" + snapshot.questions[0].question_id + "/feedback", { method: "POST" });
+    assert.equal(skippedRetry.status, 200);
+    assert.equal((await skippedRetry.json()).feedback_status, "skipped");
     const rejected = await fetch(config.base + "/sessions/" + session + "/questions/" + snapshot.questions[0].question_id + "/submit", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ selected_index: 3, explanation: "An attempted answer change after locking." }),
@@ -139,6 +149,8 @@ test("Real frontend → FastAPI → sklearn → mocked Ollama HTTP → persisted
     await act(async () => root.render(createElement(App)));
     await waitFor(() => !!host.querySelector(".dashboard-stats"));
     assert.match(host.querySelector(".dashboard-stats").textContent, /20%/);
+    assert.match(host.textContent, /No explanation provided.*feedback was skipped/);
+    assert.match(host.textContent, /Not provided\./);
     await click("Clear saved results");
     assert.equal(window.localStorage.getItem(RESULTS_KEY), null);
     assert.match(host.textContent, /No submitted quiz results yet/);

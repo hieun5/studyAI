@@ -168,7 +168,7 @@ export default function StartStudying({
             </div>
             <div className="demo-notes">
               <div><Badge>DEMO DATA</Badge><span>Try original sample notes about information retrieval.</span></div>
-              <button type="button" className="secondary" disabled={materialBusy}
+              <button type="button" className="primary" disabled={materialBusy}
                 onClick={() => {
                   inputChanged();
                   setFile(null);
@@ -331,18 +331,6 @@ export default function StartStudying({
             <li>Search using terms from your notes.</li>
           </ul>
         </Card>
-        <div className="coming-note">
-          <Badge>COMING LATER</Badge>
-          <h3>Learning that listens.</h3>
-          <p>
-            A saved-materials library is not implemented yet. Submitted quiz
-            results and topic estimates are now available on your Dashboard.
-          </p>
-          <p>
-            Sessions live temporarily in server memory. Restarting the backend
-            clears them.
-          </p>
-        </div>
       </aside>
     </div>
   );

@@ -56,7 +56,7 @@ class GenerationRequest(ClosedModel):
 
 class SubmissionRequest(ClosedModel):
     selected_index: AnswerIndex
-    explanation: Annotated[str, StringConstraints(strip_whitespace=True, min_length=10, max_length=2000)]
+    explanation: Annotated[str, StringConstraints(strip_whitespace=True, max_length=2000)] = ""
 
 
 @dataclass

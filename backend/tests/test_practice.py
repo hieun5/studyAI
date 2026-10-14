@@ -150,13 +150,43 @@ class PracticeApiTests(unittest.TestCase):
         self.assertEqual(snapshot["questions"][0]["submission"], first)
         self.assertIsNone(snapshot["questions"][2]["submission"])
 
-    def test_requires_reasoning_and_sequential_answers(self):
+    def test_sequential_answers_and_bounded_optional_reasoning(self):
         client, sid, _ = self.start()
         questions = self.generate(client, sid)["questions"]
-        for explanation in ("", "   ", "short"):
-            self.assertEqual(self.answer(client, sid, questions[0]["question_id"], explanation=explanation).status_code, 422)
+        self.assertEqual(self.answer(client, sid, questions[0]["question_id"], explanation="x" * 2001).status_code, 422)
         self.assertEqual(self.answer(client, sid, questions[1]["question_id"]).status_code, 409)
         self.assertEqual(self.answer(client, sid, "missing").status_code, 404)
+
+    def test_optional_reasoning_scores_and_locks_without_model_inference(self):
+        client, sid, fake = self.start()
+        questions = self.generate(client, sid)["questions"]
+        calls = len(fake.calls)
+        for index, explanation in enumerate(("", "   ", None)):
+            with self.subTest(explanation=explanation):
+                qid = questions[index]["question_id"]
+                body = {"selected_index": index}
+                if explanation is not None:
+                    body["explanation"] = explanation
+                url = f"/sessions/{sid}/questions/{qid}"
+                response = client.post(url + "/submit", json=body)
+                self.assertEqual(response.status_code, 200, response.text)
+                result = response.json()
+                self.assertTrue(result["locked"])
+                self.assertEqual(result["correct"], index == 0)
+                self.assertEqual(result["student_explanation"], "")
+                self.assertEqual(result["feedback_status"], "skipped")
+                self.assertIsNone(result["feedback"])
+                self.assertIsNone(result["feedback_error"])
+                self.assertTrue(result["answer_sources"])
+                self.assertEqual(client.post(url + "/submit", json=body).json(), result)
+                self.assertEqual(client.post(url + "/feedback").json(), result)
+                self.assertEqual(self.answer(client, sid, qid, index, "Added after submission").status_code, 409)
+                self.assertEqual(self.answer(client, sid, qid, (index + 1) % 4, "").status_code, 409)
+                self.assertEqual(len(fake.calls), calls)
+        short = self.answer(client, sid, questions[3]["question_id"], explanation="ATP")
+        self.assertEqual(short.status_code, 200, short.text)
+        self.assertEqual(short.json()["feedback_status"], "available")
+        self.assertEqual(len(fake.calls), calls + 1)
 
     def test_retrieved_context_and_answer_are_passed_to_feedback(self):
         client, sid, fake = self.start()

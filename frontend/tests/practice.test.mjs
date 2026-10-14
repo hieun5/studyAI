@@ -135,7 +135,7 @@ test("Unavailable Ollama shows startup instructions and disables generation", as
   assert.ok(host.querySelector('[role="alert"]'));
 });
 
-test("One question at a time, required reasoning, locked submission, and separate AI estimate", async () => {
+test("One question at a time, optional reasoning, locked submission, and separate AI estimate", async () => {
   await render(defaultFetch);
   await click("Generate Questions");
   assert.match(host.textContent, /Which molecule stores cellular energy/);
@@ -159,6 +159,38 @@ test("One question at a time, required reasoning, locked submission, and separat
   await click("Next question");
   assert.match(host.textContent, /Which process generates ATP/);
   assert.doesNotMatch(host.textContent, /Correct option:/);
+  assert.equal(host.querySelector("#reasoning").value, "");
+});
+
+test("An answer without reasoning can submit and skips AI feedback", async () => {
+  let submitted;
+  await render((url, options) => {
+    if (url.endsWith("/submit")) {
+      submitted = JSON.parse(options.body);
+      return Promise.resolve(response({
+        ...submission,
+        student_explanation: "",
+        feedback: null,
+        feedback_status: "skipped",
+        feedback_error: null,
+      }));
+    }
+    return defaultFetch(url);
+  });
+  await click("Generate Questions");
+  assert.equal(button("Submit answer").disabled, true);
+  assert.equal(host.querySelector("#reasoning").required, false);
+  assert.equal(host.querySelector("#reasoning").hasAttribute("minlength"), false);
+  await act(async () => host.querySelector(".answer-options input").click());
+  assert.equal(button("Submit answer").disabled, false);
+  await click("Submit answer");
+  assert.deepEqual(submitted, { selected_index: 0, explanation: "" });
+  assert.match(host.textContent, /Multiple-choice result: Correct/);
+  assert.match(host.textContent, /No explanation provided.*feedback was skipped/);
+  assert.equal(button("Retry AI feedback"), undefined);
+  assert.equal(host.querySelector("#reasoning").disabled, true);
+  assert.ok([...host.querySelectorAll(".answer-options input")].every((input) => input.matches(":disabled")));
+  await click("Next question");
   assert.equal(host.querySelector("#reasoning").value, "");
 });
 
