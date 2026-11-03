@@ -1,22 +1,3 @@
-# studyAI
-
-An AI-powered study application that transforms lecture notes into personalized practice questions, helping students reinforce concepts and test their understanding through interactive quizzes.
-
-Built using React, TypeScript, FastAPI, and a locally hosted Large Language Model (LLM).
-
-## Features
-
-📚 **Study Material Upload**: Upload text-based PDF lecture notes or paste notes directly into the application.
-
-🧠 **NLP-Powered Retrieval**: Uses TF-IDF vectorization and cosine similarity to retrieve relevant information from study materials.
-
-🤖 **AI-Generated Questions**: Generates personalized multiple-choice practice questions using a locally hosted LLM through Ollama.
-
-✍️ **AI-Powered Feedback**: Evaluates students' written explanations and provides contextual feedback based on their notes.
-
-✅ **Quiz Results**: Tracks correct and incorrect answers and displays performance after completing a quiz.
-
-🌙 **Modern Interface**: Desktop-friendly design with light and dark mode.
 
 ## Installation
 
@@ -110,15 +91,3 @@ http://localhost:5173
 - Ollama
 - Git
 - A computer capable of running the selected local LLM
-
-## Limitations
-
-- Designed primarily for desktop browsers.
-- Scanned PDFs requiring OCR are not supported.
-- Question generation speed depends on local hardware.
-- AI-generated questions and feedback may contain inaccuracies.
-- No account or cloud deployment is required.
-
-## Author
-
-GitHub: [hieun5](https://github.com/hieun5)
